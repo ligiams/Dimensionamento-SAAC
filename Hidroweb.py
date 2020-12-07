@@ -52,5 +52,3 @@ chuva['Ano'] = chuva.Data.dt.year
 
 chuva_mensal = chuva.groupby(['Mes','Ano']).sum()
 media_mensal = chuva_mensal.groupby(['Mes'])['Chuva'].mean()
-
-print("Olá")
