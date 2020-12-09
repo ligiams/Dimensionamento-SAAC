@@ -9,68 +9,63 @@ import pandas as pd
 import datetime as dt
 from calendar import monthrange
 
-est = "chuvas_C_02346041"
-path1 = "C:/Users/bruno/GDrive@gmail/0 - Re-mov/0 - Est&Id/5 Git/51 arruma_dados/" + est + ".csv"
-path2 = "C:/Users/bruno/GDrive@gmail/0 - Re-mov/0 - Est&Id/5 Git/51 arruma_dados/" + est +"_int.csv"
-path3 = "C:/Users/bruno/GDrive@gmail/0 - Re-mov/0 - Est&Id/5 Git/51 arruma_dados/" + est +"_transp.csv"
-path4 = "C:/Users/bruno/GDrive@gmail/0 - Re-mov/0 - Est&Id/5 Git/51 arruma_dados/" + est +"_precip.csv"
+est = "chuvas_C_02346041.csv"
+path = "C:/Users/bruno/GDrive@gmail/0 - Re-mov/0 - Est&Id/5 Git/51 arruma_dados/" + est
+exp = path + "_export"
 
-# dropando linhas e colunas que não vamos usar
+df1 = pd.read_csv(path, sep=';', encoding='windows-1252', header=8, index_col=False, decimal=',', thousands='.')
+df1['Data']=pd.to_datetime(df1['Data'], format="%d/%m/%Y")
 
-df1 = pd.read_csv(path1, sep=';', encoding='windows-1252', header=8, skipinitialspace=True, index_col=False, skiprows=(0), decimal=',', thousands='.')
-to_drop =[0,3,4,5,6,7,8,9,10,11,12,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74]
-df1.drop(df1.columns[to_drop], axis=1, inplace=True)
-df2 = df1.drop(df1.columns[[0,1]], axis=1, inplace=False)
+df1=df1.assign(**{'ano': pd.DatetimeIndex(df1['Data']).year,
+                  'mes': pd.DatetimeIndex(df1['Data']).month})
+df1.insert(len(df1.columns),'n_dias',[monthrange(df1['ano'][x],df1['mes'][x])[1] for x in range(len(df1['Data']))])
 
-# arrumando datas
+# ordenando chuvas 
 
-datas = pd.to_datetime(df1['Data'], format="%d/%m/%Y")
-dia = min(datas)
-ultimo_dia = max(datas)
+precip =[]
+lin=0
+col_i=df1.columns.get_loc('Chuva01')
 
-# extraindo quantidade de dias por semana 
-
-ano = pd.DatetimeIndex(datas).year
-mes = pd.DatetimeIndex(datas).month
-dias_mes = []
-x=0
-while x < len(datas):  
-    dias_mes.append(monthrange(ano[x],mes[x])[1])
-    x+=1
+for lin in range(len(df1['Data'])):                     
+    for col in range(col_i,df1['n_dias'][lin]+col_i):
+        precip.append(df1.iloc[lin][col])
+    lin+=1
     
-n_dias = pd.DataFrame({'data':     datas,
-                       'dias_mes': dias_mes
-                       })
+# ordenando dias, considerando que há anos < 12 meses
 
-# criando série de dias
- 
 dias=[]
+dias.append(min(df1['Datas']))
+lin=0
 
-for dia in pd.date_range(min(datas),max(datas)):
-    dia += dt.timedelta(days=1)
-    dias.append(dia)
+for lin in range(len(df1['Data'])):
+    for dia in range(df1['n_dias'][lin]):
+        dias.append(df1['Data'][lin]+dt.timedelta(days=dia))
+    lin+=1
 
-#criando df com coluna de dias e coluna com precipitações
+# juntando e exportando
 
+df2 = pd.DataFrame({'Data':        dias,
+                   'Chuva_mm_dia': precip})
 
-len(precip)
-len(dias)
+df2.to_csv(exp+'.csv', sep=';',index=False, decimal=',',header=False)
 
-precip2 =[]
+'''
+# análises
 
-for y in len(datas):
-    for x in x precip2.append()
+meses_serie_real = df1['Data'].groupby(by=df1['Data'].dt.year).count()
+meses_serie_ideal
+dias_serie_real =
+dias_serie_ideal =
+registros_real =
+registros_ideal =
 
-precip = df2.stack(level=-1, dropna=False)
+dias_seq=[]
 
-dados = {'Data':  dias,
-        'Precipitacao': precip
-        }
+for dia in pd.date_range(min(df1['Data']),max(df1['Data'])):
+    dias_seq.append(min(df1['Data'])+dt.timedelta(days=1))
+'''
 
-df3 = pd.DataFrame(dados)
-
-df1.to_csv(path2,sep=';', decimal=',',index = False)
-df3.to_csv(path3,sep=';', decimal=',',index = False)
-precip.to_csv(path4,sep=';', decimal=',',index = False)
-
-
+'''
+# baixar arquivo
+# colocar jeito de selecionar arquivo
+'''
