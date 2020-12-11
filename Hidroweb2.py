@@ -8,12 +8,29 @@ Created on Tue Dec  1 12:00:55 2020
 import pandas as pd
 import datetime as dt
 from calendar import monthrange
+import tkinter as tk
+from tkinter import filedialog
+import os
 
-est = "chuvas_C_02346041.csv"
-path = "C:/Users/bruno/GDrive@gmail/0 - Re-mov/0 - Est&Id/5 Git/51 arruma_dados/" + est
-exp = path + "_export"
+# caixa de diálogo para escolher arquivo
 
-df1 = pd.read_csv(path, sep=';', encoding='windows-1252', header=8, index_col=False, decimal=',', thousands='.')
+root = tk.Tk()
+root.lift()
+root.attributes('-topmost',True)
+root.after_idle(root.attributes,'-topmost',False)
+chuva_entrada = tk.filedialog.askopenfile(mode='r', title = 'Selecione arquivo')    
+root.destroy()
+ 
+if (chuva_entrada == None): 
+    sair = input('\tArquivo de entrada não selecionado. \n\t\tPressione enter para sair.\n')
+ 
+caminho = os.path.dirname(chuva_entrada.name)+'/'
+arquivo_entrada = os.path.basename(chuva_entrada.name)
+arquivo_saida = arquivo_entrada[:-4]+'_saida.csv'
+
+# lendo
+
+df1 = pd.read_csv(chuva_entrada.name, sep=';', encoding='windows-1252', header=8, index_col=False, decimal=',', thousands='.')
 df1['Data']=pd.to_datetime(df1['Data'], format="%d/%m/%Y")
 
 df1=df1.assign(**{'ano': pd.DatetimeIndex(df1['Data']).year,
@@ -30,11 +47,10 @@ for lin in range(len(df1['Data'])):
     for col in range(col_i,df1['n_dias'][lin]+col_i):
         precip.append(df1.iloc[lin][col])
     lin+=1
-    
+
 # ordenando dias, considerando que há anos < 12 meses
 
 dias=[]
-dias.append(min(df1['Datas']))
 lin=0
 
 for lin in range(len(df1['Data'])):
@@ -47,25 +63,10 @@ for lin in range(len(df1['Data'])):
 df2 = pd.DataFrame({'Data':        dias,
                    'Chuva_mm_dia': precip})
 
-df2.to_csv(exp+'.csv', sep=';',index=False, decimal=',',header=False)
+df2.to_csv(caminho+arquivo_saida, sep=';',index=False, decimal=',',header=True)
 
-'''
-# análises
+print('\n\n#########\n\nArquivo exportado com sucesso.\n'
+      '\tArquivo original:\t'+arquivo_entrada+'\n'
+      '\tArquivo novo:\t\t' +arquivo_saida+'\n'
+      '\tLocal:\t\t\t\t'+caminho)
 
-meses_serie_real = df1['Data'].groupby(by=df1['Data'].dt.year).count()
-meses_serie_ideal
-dias_serie_real =
-dias_serie_ideal =
-registros_real =
-registros_ideal =
-
-dias_seq=[]
-
-for dia in pd.date_range(min(df1['Data']),max(df1['Data'])):
-    dias_seq.append(min(df1['Data'])+dt.timedelta(days=1))
-'''
-
-'''
-# baixar arquivo
-# colocar jeito de selecionar arquivo
-'''
