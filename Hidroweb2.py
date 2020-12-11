@@ -2,7 +2,7 @@
 """
 Created on Tue Dec  1 12:00:55 2020
 
-@author: bruno
+@author: bruno ang ligiones
 """
 
 import pandas as pd
@@ -16,9 +16,10 @@ import os
 
 root = tk.Tk()
 root.lift()
+root.attributes('-alpha', 0)
 root.attributes('-topmost',True)
 root.after_idle(root.attributes,'-topmost',False)
-chuva_entrada = tk.filedialog.askopenfile(mode='r', title = 'Selecione arquivo')    
+chuva_entrada = tk.filedialog.askopenfile(mode='r', title = 'Selecione arquivo csv')    
 root.destroy()
  
 if (chuva_entrada == None): 
@@ -39,9 +40,9 @@ df1.insert(len(df1.columns),'n_dias',[monthrange(df1['ano'][x],df1['mes'][x])[1]
 
 # ordenando chuvas 
 
-precip =[]
-lin=0
-col_i=df1.columns.get_loc('Chuva01')
+precip = []
+lin = 0
+col_i = df1.columns.get_loc('Chuva01')
 
 for lin in range(len(df1['Data'])):                     
     for col in range(col_i,df1['n_dias'][lin]+col_i):
@@ -63,10 +64,26 @@ for lin in range(len(df1['Data'])):
 df2 = pd.DataFrame({'Data':        dias,
                    'Chuva_mm_dia': precip})
 
-df2.to_csv(caminho+arquivo_saida, sep=';',index=False, decimal=',',header=True)
+df2.to_csv(caminho+arquivo_saida, sep=';',index=False, decimal=',',header=True)      
 
 print('\n\n#########\n\nArquivo exportado com sucesso.\n'
       '\tArquivo original:\t'+arquivo_entrada+'\n'
       '\tArquivo novo:\t\t' +arquivo_saida+'\n'
       '\tLocal:\t\t\t\t'+caminho)
+
+# loop infinito até responder direito se quer ou não abrir o arquivo exportado
+
+while True: 
+    try:
+        resp = str(input('Vossa excelência gostaria abrir o arquivo exportado? (S/N): ')).lower()
+        if resp == 's':
+            os.startfile(caminho+arquivo_saida,'edit')
+            break
+        if resp == 'n':        
+            print('\nfirmeza entao')
+            break
+        else:
+            print('\nresponde direito >:(') 
+    except:
+        print('reponde direito')  
 
